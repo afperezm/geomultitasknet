@@ -26,6 +26,7 @@ class MobileNetV2(MobileNetV2):
     block : [type], optional
         cf. <torchvision.models.MobileNetV2>, by default None
     """
+
     def __init__(self,
                  n_channels,
                  n_classes,

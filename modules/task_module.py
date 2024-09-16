@@ -18,16 +18,16 @@ from .utils import spatiotemporal_batches, calc_miou, four_crops
 
 class SegmentationTask(pl.LightningModule):
     def __init__(
-        self,
-        model,
-        num_classes,
-        criteria,
-        optimizer,
-        scheduler=None,
-        uda = False,
-        geo_data = False,
-        metadata = False,
-        config_name = False
+            self,
+            model,
+            num_classes,
+            criteria,
+            optimizer,
+            scheduler=None,
+            uda=False,
+            geo_data=False,
+            metadata=False,
+            config_name=False
     ):
 
         super().__init__()
@@ -41,37 +41,36 @@ class SegmentationTask(pl.LightningModule):
         self.metadata = metadata
         self.config_name = config_name
 
-
     def setup(self, stage=None):
         if stage == "fit":
             self.train_epoch_loss, self.val_epoch_loss = None, None
             self.train_epoch_metrics, self.val_epoch_metrics = None, None
 
             self.train_metrics = JaccardIndex(
-                    num_classes=self.num_classes,
-                    absent_score=1.0,
-                    reduction='elementwise_mean')
+                num_classes=self.num_classes,
+                absent_score=1.0,
+                reduction='elementwise_mean')
             self.val_metrics = JaccardIndex(
-                    num_classes=self.num_classes,
-                    absent_score=1.0,
-                    reduction='elementwise_mean')
+                num_classes=self.num_classes,
+                absent_score=1.0,
+                reduction='elementwise_mean')
             self.train_loss = MeanMetric()
             self.val_loss = MeanMetric()
 
         elif stage == "validate":
             self.val_epoch_loss, self.val_epoch_metrics = None, None
             self.val_metrics = JaccardIndex(
-                    num_classes=self.num_classes,
-                    absent_score=1.0,
-                    reduction='elementwise_mean')
+                num_classes=self.num_classes,
+                absent_score=1.0,
+                reduction='elementwise_mean')
             self.val_loss = MeanMetric()
 
         elif stage == "test":
-            self.cm_test_metrics = ConfusionMatrix(task="multiclass", 
-                                                num_classes=self.num_classes)
+            self.cm_test_metrics = ConfusionMatrix(task="multiclass",
+                                                   num_classes=self.num_classes)
             self.test_metrics = JaccardIndex(
-                    num_classes=self.num_classes,
-                    reduction = "none")
+                num_classes=self.num_classes,
+                reduction="none")
 
     def forward(self, input_im, idx):
         outputs = {}
@@ -80,14 +79,14 @@ class SegmentationTask(pl.LightningModule):
         elif self.model.name in ("ConcatGeoUNet", "GeoUNet"):
             outputs["x1"], outputs["x2"], outputs["x5"], outputs["logits"] = self.model(input_im, idx)
         elif self.model.name == "GeoTimeMultiTaskNet":
-            outputs["logits"], outputs["x_coord"], outputs["x_time"] = self.model(input_im)   
+            outputs["logits"], outputs["x_coord"], outputs["x_time"] = self.model(input_im)
         elif self.model.name == "GeoMultiTaskNet":
-            outputs["logits"], outputs["x_coord"] = self.model(input_im)    
+            outputs["logits"], outputs["x_coord"] = self.model(input_im)
         elif self.model.name == "StyleGeoMultiTaskNet":
-            outputs["x1"], outputs["x2"], outputs["logits"], outputs["x_coord"] = self.model(input_im) 
+            outputs["x1"], outputs["x2"], outputs["logits"], outputs["x_coord"] = self.model(input_im)
         return outputs
 
-    def step(self, batch, stage = "train"):
+    def step(self, batch, stage="train"):
         if stage == "train":
             idx, images, targets = batch["source"]
             if self.uda:
@@ -104,56 +103,71 @@ class SegmentationTask(pl.LightningModule):
             target_outputs = self.forward(im_t, idx_t)
 
             if self.criteria["constraint_name"] == "style_loss":
-                constr_criterion= self.criteria["constraint"]
+                constr_criterion = self.criteria["constraint"]
                 constr_weight = self.criteria["constraint_weight"]
                 style_loss1 = constr_criterion(outputs["x1"], target_outputs["x1"])
                 style_loss2 = constr_criterion(outputs["x2"], target_outputs["x2"])
-                loss = loss + constr_weight*style_loss1 + constr_weight*style_loss2
+                loss = loss + constr_weight * style_loss1 + constr_weight * style_loss2
             elif self.criteria["constraint_name"] == "coral":
-                constr_criterion= self.criteria["constraint"]
+                constr_criterion = self.criteria["constraint"]
                 constr_weight = self.criteria["constraint_weight"]
                 f_l = torch.reshape(torch.permute(outputs["x5"], (0, 2, 3, 1)), (-1, outputs["x5"].shape[-1]))
-                f_un = torch.reshape(torch.permute(target_outputs["x5"], (0, 2, 3, 1)), (-1, target_outputs["x5"].shape[-1]))
+                f_un = torch.reshape(torch.permute(target_outputs["x5"], (0, 2, 3, 1)),
+                                     (-1, target_outputs["x5"].shape[-1]))
                 coral_loss = constr_criterion(f_l, f_un)
-                loss = loss + constr_weight*coral_loss
+                loss = loss + constr_weight * coral_loss
             elif self.criteria["constraint_name"] == "multitask_strategy":
-                constr_criterion= self.criteria["constraint"]
+                constr_criterion = self.criteria["constraint"]
                 constr_weight = self.criteria["constraint_weight"]
-                coords_l, month_l, hour_l, _, _, _ = spatiotemporal_batches(idx, self.geo_data, 
-                                                                            pos_enc_coords = self.metadata["pos_enc_coords"], 
-                                                                            circle_encoding = self.metadata["circle_encoding"],
-                                                                            encoding_freq= self.metadata["encoding_freq"],
-                                                                            geo_noise = self.metadata["geo_noise"])
-                coords_un, month_un, hour_un, _, _, _ = spatiotemporal_batches(idx_t, self.geo_data,                                                                             pos_enc_coords = self.metadata["pos_enc_coords"], 
-                                                                            circle_encoding = self.metadata["circle_encoding"],
-                                                                            encoding_freq= self.metadata["encoding_freq"],
-                                                                            geo_noise = self.metadata["geo_noise"])
+                coords_l, month_l, hour_l, _, _, _ = spatiotemporal_batches(idx, self.geo_data,
+                                                                            pos_enc_coords=self.metadata[
+                                                                                "pos_enc_coords"],
+                                                                            circle_encoding=self.metadata[
+                                                                                "circle_encoding"],
+                                                                            encoding_freq=self.metadata[
+                                                                                "encoding_freq"],
+                                                                            geo_noise=self.metadata["geo_noise"])
+                coords_un, month_un, hour_un, _, _, _ = spatiotemporal_batches(idx_t, self.geo_data,
+                                                                               pos_enc_coords=self.metadata[
+                                                                                   "pos_enc_coords"],
+                                                                               circle_encoding=self.metadata[
+                                                                                   "circle_encoding"],
+                                                                               encoding_freq=self.metadata[
+                                                                                   "encoding_freq"],
+                                                                               geo_noise=self.metadata["geo_noise"])
                 coord_loss1 = constr_criterion(outputs["x_coord"], coords_l)
                 coord_loss2 = constr_criterion(target_outputs["x_coord"], coords_un)
                 if self.criteria["mt_time"]:
-                    time_l = torch.cat([month_l, hour_l], dim = -1)
-                    time_un = torch.cat([month_un, hour_un], dim = -1)
+                    time_l = torch.cat([month_l, hour_l], dim=-1)
+                    time_un = torch.cat([month_un, hour_un], dim=-1)
                     time_loss1 = constr_criterion(outputs["x_time"], time_l)
                     time_loss2 = constr_criterion(target_outputs["x_time"], time_un)
-                    loss += coord_loss1 + coord_loss2 + constr_weight*time_loss1 + constr_weight*time_loss2
+                    loss += coord_loss1 + coord_loss2 + constr_weight * time_loss1 + constr_weight * time_loss2
                 else:
-                    loss += constr_weight*coord_loss1 + constr_weight*coord_loss2
+                    loss += constr_weight * coord_loss1 + constr_weight * coord_loss2
             elif self.criteria["constraint_name"] == "multitask_and_style":
-                constr_criterion= self.criteria["constraint"]["multitask"]
+                constr_criterion = self.criteria["constraint"]["multitask"]
                 constr_weight = self.criteria["constraint_weight"]
-                coords_l, month_l, hour_l, _, _, _ = spatiotemporal_batches(idx, self.geo_data, 
-                                                                            pos_enc_coords = self.metadata["pos_enc_coords"], 
-                                                                            circle_encoding = self.metadata["circle_encoding"],
-                                                                            encoding_freq= self.metadata["encoding_freq"],
-                                                                            geo_noise = self.metadata["geo_noise"])
-                coords_un, month_un, hour_un, _, _, _ = spatiotemporal_batches(idx_t, self.geo_data,                                                                             pos_enc_coords = self.metadata["pos_enc_coords"], 
-                                                                            circle_encoding = self.metadata["circle_encoding"],
-                                                                            encoding_freq= self.metadata["encoding_freq"],
-                                                                            geo_noise = self.metadata["geo_noise"])
+                coords_l, month_l, hour_l, _, _, _ = spatiotemporal_batches(idx, self.geo_data,
+                                                                            pos_enc_coords=self.metadata[
+                                                                                "pos_enc_coords"],
+                                                                            circle_encoding=self.metadata[
+                                                                                "circle_encoding"],
+                                                                            encoding_freq=self.metadata[
+                                                                                "encoding_freq"],
+                                                                            geo_noise=self.metadata["geo_noise"])
+                coords_un, month_un, hour_un, _, _, _ = spatiotemporal_batches(idx_t, self.geo_data,
+                                                                               pos_enc_coords=self.metadata[
+                                                                                   "pos_enc_coords"],
+                                                                               circle_encoding=self.metadata[
+                                                                                   "circle_encoding"],
+                                                                               encoding_freq=self.metadata[
+                                                                                   "encoding_freq"],
+                                                                               geo_noise=self.metadata["geo_noise"])
                 coord_loss1 = constr_criterion(outputs["x_coord"], coords_l)
                 coord_loss2 = constr_criterion(target_outputs["x_coord"], coords_un)
                 style_loss1 = self.criteria["constraint"]["style"](outputs["x1"], target_outputs["x1"])
-                loss += constr_weight*coord_loss1 + constr_weight*coord_loss2 + style_loss1*100000000000
+                loss += constr_weight * coord_loss1 + constr_weight * coord_loss2 + style_loss1 * 100000000000
 
         with torch.no_grad():
             proba = torch.softmax(outputs["logits"], dim=1)
@@ -163,7 +177,7 @@ class SegmentationTask(pl.LightningModule):
         return loss, preds, targets
 
     def training_step(self, batch, batch_idx):
-        loss, preds, targets = self.step(batch, stage = "train")
+        loss, preds, targets = self.step(batch, stage="train")
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def training_step_end(self, step_output):
@@ -180,19 +194,19 @@ class SegmentationTask(pl.LightningModule):
         self.train_epoch_loss = self.train_loss.compute()
         self.train_epoch_metrics = self.train_metrics.compute()
         self.log(
-                "train_loss",
-                self.train_epoch_loss, 
-                on_step=False, 
-                on_epoch=True, 
-                prog_bar=True, 
-                logger=True,
-                rank_zero_only=True
-                )
+            "train_loss",
+            self.train_epoch_loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            rank_zero_only=True
+        )
         self.train_loss.reset()
         self.train_metrics.reset()
 
     def validation_step(self, batch, batch_idx):
-        loss, preds, targets = self.step(batch, stage = "val")
+        loss, preds, targets = self.step(batch, stage="val")
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def validation_step_end(self, step_output):
@@ -239,12 +253,11 @@ class SegmentationTask(pl.LightningModule):
                 pred = torch.argmax(proba, dim=1)
                 preds.append(pred)
 
-        fpred = torch.zeros((1, 512,512)).to("cuda")
+        fpred = torch.zeros((1, 512, 512)).to("cuda")
         fpred[:, 0:256, 0:256] = preds[0]
         fpred[:, 256:512, 0:256] = preds[1]
         fpred[:, 0:256, 256:512] = preds[2]
         fpred[:, 256:512, 256:512] = preds[3]
-
 
         preds = fpred.unsqueeze(0).flatten(start_dim=1).type(torch.int32)
         targets = targets.flatten(start_dim=1).type(torch.int32)
@@ -263,16 +276,16 @@ class SegmentationTask(pl.LightningModule):
     def test_epoch_end(self, outputs):
         cm = self.cm_test_metrics.compute().cpu().numpy()
 
-        fig, ax = plt.subplots(figsize=(36,15)) 
+        fig, ax = plt.subplots(figsize=(36, 15))
         ax.set(xlabel='Predicted', ylabel='Actual')
         df_cm = pd.DataFrame(cm, range(self.num_classes), range(self.num_classes)).astype(np.int64)
-        res = sn.heatmap(df_cm, annot=True, annot_kws={"size": 16}, cmap='Blues',  fmt=',d', ax = ax, cbar = False)
-        res.set_xticklabels(res.get_xmajorticklabels(), fontsize = 15)
-        res.set_yticklabels(res.get_ymajorticklabels(), fontsize = 15)
+        res = sn.heatmap(df_cm, annot=True, annot_kws={"size": 16}, cmap='Blues', fmt=',d', ax=ax, cbar=False)
+        res.set_xticklabels(res.get_xmajorticklabels(), fontsize=15)
+        res.set_yticklabels(res.get_ymajorticklabels(), fontsize=15)
         plt.savefig(f"experiments/{self.config_name}/conf_matrix.jpeg")
 
         classes = ['autres', 'batiment', 'zone-permeable', 'zone-impermeable', 'sol-nu', 'surface_eau',
-                'coniferes', 'feuillus', 'broussaille', 'vigne', 'pelouse', 'culture', 'terre_labouree']
+                   'coniferes', 'feuillus', 'broussaille', 'vigne', 'pelouse', 'culture', 'terre_labouree']
         miou, ious = calc_miou(cm)
         tab = PrettyTable(['Class', 'mIou'])
         for i in range(self.num_classes):
@@ -296,21 +309,20 @@ class SegmentationTask(pl.LightningModule):
                 pred = torch.argmax(proba, dim=1)
                 preds.append(pred)
 
-        fpred = torch.zeros((1, 512,512)).to("cuda")
+        fpred = torch.zeros((1, 512, 512)).to("cuda")
         fpred[:, 0:256, 0:256] = preds[0]
         fpred[:, 256:512, 0:256] = preds[1]
         fpred[:, 0:256, 256:512] = preds[2]
         fpred[:, 256:512, 256:512] = preds[3]
 
-        image = torch.zeros((3, 512,512))
+        image = torch.zeros((3, 512, 512))
         image[:, 0:256, 0:256] = images[0]
         image[:, 256:512, 0:256] = images[1]
         image[:, 0:256, 256:512] = images[2]
         image[:, 256:512, 256:512] = images[3]
 
-
         out_batch = {}
-        out_batch["preds"] =  fpred.type(torch.int32)
+        out_batch["preds"] = fpred.type(torch.int32)
         out_batch["img"] = image
         out_batch["id"] = idx
         return out_batch
@@ -327,4 +339,5 @@ class SegmentationTask(pl.LightningModule):
             }
             config = {"optimizer": self.optimizer, "lr_scheduler": lr_scheduler_config}
             return config
-        else: return self.optimizer       
+        else:
+            return self.optimizer

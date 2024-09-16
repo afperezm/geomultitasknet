@@ -7,35 +7,35 @@ from .dataset import SupDataset, InfiniteDataLoader
 class DataModule(LightningDataModule):
 
     def __init__(
-        self, 
-        path,
-        source_images_txt, 
-        source_masks_txt, 
-        target_images_txt, 
-        target_masks_txt, 
-        bands = 'rgbirh',
-        train_augmentation=None,
-        valid_augmentation=None,
-        cropsize = 256,
-        geoinfo = False,
-        batch_size = 25,
-        num_workers = 0,
-        drop_last = False,
-        uda = False,
+            self,
+            path,
+            source_images_txt,
+            source_masks_txt,
+            target_images_txt,
+            target_masks_txt,
+            bands='rgbirh',
+            train_augmentation=None,
+            valid_augmentation=None,
+            cropsize=256,
+            geoinfo=False,
+            batch_size=25,
+            num_workers=0,
+            drop_last=False,
+            uda=False,
     ):
         super().__init__()
         self.path = path,
-        self.source_images_txt = source_images_txt, 
-        self.source_masks_txt = source_masks_txt, 
-        self.target_images_txt = target_images_txt, 
-        self.target_masks_txt = target_masks_txt, 
+        self.source_images_txt = source_images_txt,
+        self.source_masks_txt = source_masks_txt,
+        self.target_images_txt = target_images_txt,
+        self.target_masks_txt = target_masks_txt,
         self.bands = bands,
-        self.train_augmentation= train_augmentation,
+        self.train_augmentation = train_augmentation,
         self.valid_augmentation = valid_augmentation,
         self.cropsize = cropsize,
         self.geoinfo = geoinfo,
-        self.batch_size = batch_size, 
-        self.num_workers = num_workers, 
+        self.batch_size = batch_size,
+        self.num_workers = num_workers,
         self.drop_last = drop_last,
         self.uda = uda,
 
@@ -46,79 +46,79 @@ class DataModule(LightningDataModule):
         if stage == "fit":
             self.source_dataset = SupDataset(
                 self.path[0],
-                self.source_images_txt[0], 
-                self.source_masks_txt[0], 
-                bands = self.bands[0],
+                self.source_images_txt[0],
+                self.source_masks_txt[0],
+                bands=self.bands[0],
                 cropsize=self.cropsize[0],
-                augmentation= self.train_augmentation[0],
+                augmentation=self.train_augmentation[0],
             )
 
             self.target_dataset = SupDataset(
                 self.path[0],
-                self.target_images_txt[0], 
-                self.target_masks_txt[0], 
-                bands = self.bands[0],
+                self.target_images_txt[0],
+                self.target_masks_txt[0],
+                bands=self.bands[0],
                 cropsize=self.cropsize[0],
-                augmentation= self.train_augmentation[0],
+                augmentation=self.train_augmentation[0],
             )
 
             self.val_dataset = SupDataset(
-                    self.path[0],
-                    self.target_images_txt[0], 
-                    self.target_masks_txt[0], 
-                    bands = self.bands[0],
-                    cropsize=self.cropsize[0],
-                    augmentation= self.valid_augmentation[0],
-                )
+                self.path[0],
+                self.target_images_txt[0],
+                self.target_masks_txt[0],
+                bands=self.bands[0],
+                cropsize=self.cropsize[0],
+                augmentation=self.valid_augmentation[0],
+            )
 
         if stage in ("predict", "validate", "val", "test"):
-                self.val_dataset = SupDataset(
-                    self.path[0],
-                    self.target_images_txt[0], 
-                    self.target_masks_txt[0], 
-                    bands = self.bands[0],
-                    cropsize=self.cropsize[0],
-                    augmentation= self.valid_augmentation[0],
-                    stage = "test"
-                )
+            self.val_dataset = SupDataset(
+                self.path[0],
+                self.target_images_txt[0],
+                self.target_masks_txt[0],
+                bands=self.bands[0],
+                cropsize=self.cropsize[0],
+                augmentation=self.valid_augmentation[0],
+                stage="test"
+            )
 
-                self.test_dataset = SupDataset(
-                    self.path[0],
-                    self.target_images_txt[0], 
-                    self.target_masks_txt[0], 
-                    bands = self.bands[0],
-                    cropsize=self.cropsize[0],
-                    augmentation= self.valid_augmentation[0],
-                    stage = "test"
-                )
+            self.test_dataset = SupDataset(
+                self.path[0],
+                self.target_images_txt[0],
+                self.target_masks_txt[0],
+                bands=self.bands[0],
+                cropsize=self.cropsize[0],
+                augmentation=self.valid_augmentation[0],
+                stage="test"
+            )
 
     def train_dataloader(self):
         if self.uda[0]:
             source_dataloader = DataLoader(
-            dataset=self.source_dataset,
-            batch_size=self.batch_size[0],
-            shuffle=True,
-            num_workers=self.num_workers[0],
-            drop_last=True,
+                dataset=self.source_dataset,
+                batch_size=self.batch_size[0],
+                shuffle=True,
+                num_workers=self.num_workers[0],
+                drop_last=True,
             )
             target_dataloader = InfiniteDataLoader(
-            dataset=self.target_dataset,
-            batch_size=self.batch_size[0],
-            shuffle=True,
-            num_workers=self.num_workers[0],
-            drop_last=True,
+                dataset=self.target_dataset,
+                batch_size=self.batch_size[0],
+                shuffle=True,
+                num_workers=self.num_workers[0],
+                drop_last=True,
             )
-            loaders = {"source" : source_dataloader, 
-                       "target" : target_dataloader}
+            loaders = {"source": source_dataloader,
+                       "target": target_dataloader}
             return loaders
         else:
-            loaders = {"source" : DataLoader(
-            dataset=self.source_dataset,
-            batch_size=self.batch_size[0],
-            shuffle=True,
-            num_workers=self.num_workers[0],
-            drop_last=self.drop_last[0],
-            ) 
+            loaders = {"source": DataLoader(
+                dataset=self.source_dataset,
+                batch_size=self.batch_size[0],
+                shuffle=True,
+                num_workers=self.num_workers[0],
+                drop_last=self.drop_last[0],
+            )
             }
             return loaders
 
@@ -130,11 +130,11 @@ class DataModule(LightningDataModule):
             num_workers=self.num_workers[0],
             drop_last=self.drop_last[0],
         )
-    
+
     def predict_dataloader(self):
         return DataLoader(
             dataset=self.test_dataset,
-            batch_size=1, 
+            batch_size=1,
             shuffle=False,
             num_workers=self.num_workers[0],
             drop_last=self.drop_last[0],

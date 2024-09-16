@@ -24,7 +24,7 @@ class DoubleConv(nn.Module):
         if batch_norm is True:
             self.double_conv = nn.Sequential(
                 nn.Conv2d(in_ch, out_ch, 3, padding=1),  # different from original U-Net (padding is set to 0)
-                nn.BatchNorm2d(out_ch),                  # original U-Net does not contain batch normalisation
+                nn.BatchNorm2d(out_ch),  # original U-Net does not contain batch normalisation
                 nn.ReLU(inplace=True),
                 nn.Conv2d(out_ch, out_ch, 3, padding=1),
                 nn.BatchNorm2d(out_ch),
@@ -46,6 +46,7 @@ class DoubleConv(nn.Module):
 class InputConv(nn.Module):
     """Input convolution, clone of DoubleConv
     """
+
     def __init__(self, in_ch, out_ch, batch_norm=False):
         super(InputConv, self).__init__()
         self.double_conv = DoubleConv(in_ch, out_ch, batch_norm)
@@ -161,6 +162,7 @@ class ConvRelu(nn.Module):
     out_ch : int
         number of output channels
     """
+
     def __init__(self, in_ch, out_ch):
         super().__init__()
         self.conv = conv3x3(in_ch, out_ch)
@@ -210,6 +212,7 @@ class DecoderBlockV2(nn.Module):
     def forward(self, x):
         return self.block(x)
 
+
 class UNetResNet(nn.Module):
 
     def __init__(self, encoder_depth, n_classes, n_channels, num_filters=32, dropout_2d=0.2,
@@ -249,23 +252,23 @@ class UNetResNet(nn.Module):
         self.name = "ResUNet"
 
         if encoder_depth == 18:
-            self.encoder = torchvision.models.resnet18(weights=pretrained) #, num_classes=n_classes)
+            self.encoder = torchvision.models.resnet18(weights=pretrained)  # , num_classes=n_classes)
             bottom_channel_nr = 512
             self.name = "ResUNet18"
         elif encoder_depth == 34:
-            self.encoder = torchvision.models.resnet34(weights=pretrained) #, num_classes=n_classes)
+            self.encoder = torchvision.models.resnet34(weights=pretrained)  # , num_classes=n_classes)
             bottom_channel_nr = 512
             self.name = "ResUNet34"
         elif encoder_depth == 50:
-            self.encoder = torchvision.models.resnet50(weights=pretrained) #, num_classes=n_classes)
+            self.encoder = torchvision.models.resnet50(weights=pretrained)  # , num_classes=n_classes)
             bottom_channel_nr = 2048
             self.name = "ResUNet50"
         elif encoder_depth == 101:
-            self.encoder = torchvision.models.resnet101(weights=pretrained) #, num_classes=n_classes)
+            self.encoder = torchvision.models.resnet101(weights=pretrained)  # , num_classes=n_classes)
             bottom_channel_nr = 2048
             self.name = "ResUNet101"
         elif encoder_depth == 152:
-            self.encoder = torchvision.models.resnet152(weights=pretrained) #, num_classes=n_classes)
+            self.encoder = torchvision.models.resnet152(weights=pretrained)  # , num_classes=n_classes)
             bottom_channel_nr = 2048
             self.name = "ResUNet152"
         else:

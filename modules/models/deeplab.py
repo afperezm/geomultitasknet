@@ -18,6 +18,7 @@ class Decoder(nn.Module):
     NotImplementedError
         [description]
     """
+
     def __init__(self, num_classes, backbone):
 
         super(Decoder, self).__init__()
@@ -88,4 +89,3 @@ class DeeplabV3p(nn.Module):
         x = F.interpolate(x, size=input.size()[2:], mode='bilinear', align_corners=True)
 
         return low_level_feat, x
-

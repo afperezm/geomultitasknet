@@ -23,3 +23,6 @@ Generate test lists
 find flair_1_aerial_test -name *.tif | sort | grep -E 'D064_|D068_|D071_' > sub_test_imgs.txt
 find flair_1_labels_test -name *.tif | sort | grep -E 'D064_|D068_|D071_' > sub_test_masks.txt
 ```
+
+## Acknowledgments
+The code is adapted from [Valerio Marsocci's GeoMultiTaskNet code](https://github.com/VMarsocci/geomultitasknet). Refer also to the [published paper](https://arxiv.org/pdf/2304.07750).

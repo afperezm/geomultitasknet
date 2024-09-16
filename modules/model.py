@@ -1,6 +1,6 @@
-from .models.unet import UNet, FDMUNet, ConcatGeoUNet, GeoUNet, EncoderConv
-from .models.deeplab import DeeplabV3p
-from .models.resnetunet import UNetResNet
+from .networks.unet import UNet, FDMUNet, ConcatGeoUNet, GeoUNet, EncoderConv
+from .networks.deeplab import DeeplabV3p
+from .networks.resnetunet import UNetResNet
 
 import torch
 import torch.nn as nn

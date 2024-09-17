@@ -1,3 +1,5 @@
+import sys
+
 import cv2
 import numpy as np
 import os
@@ -43,13 +45,44 @@ class SupDataset(Dataset):
         self.geo_info = geo_info
         self.stage = stage
 
+    def load_bands(self, img):
+        if self.bands == 'rgbirh':
+            return img
+        elif self.bands == 'rgb':
+            return img[:, :, :3]
+        elif self.bands == 'rgbir':
+            return img[:, :, :4]
+        else:
+            return img
+
+    def crop_or_resize(self, image, mask):
+        n = random.randint(1, 2)
+        if n == 1:
+            choice = self.random_crop(image, mask)
+        if n == 2:
+            choice = self.im_resize(image, mask)
+        return choice
+
+    def im_resize(self, image, mask):
+        image = cv2.resize(image, (self.crop_size, self.crop_size), interpolation=cv2.INTER_NEAREST)
+        mask = cv2.resize(mask, (self.crop_size, self.crop_size), interpolation=cv2.INTER_NEAREST)
+        return image, mask
+
+    def random_crop(self, image, mask):
+        h = np.random.randint(0, self.crop_size)
+        w = np.random.randint(0, self.crop_size)
+        image = image[h:h + self.crop_size, w:w + self.crop_size, :]
+        mask = mask[h:h + self.crop_size, w:w + self.crop_size]
+        return image, mask
+
     def __getitem__(self, i):
 
         # read data
         image = tiff.imread(os.path.join(self.data_dir, self.images_fps[i]))
         mask = tiff.imread(os.path.join(self.data_dir, self.masks_fps[i]))
 
-        image = load_bands(image, self.bands)  # select only bands of interest
+        # select only bands of interest
+        image = self.load_bands(image)
 
         mask[mask == 19] = 0
         mask[mask == 18] = 0
@@ -61,7 +94,7 @@ class SupDataset(Dataset):
 
         # random crop of the image and the mask
         if self.crop_size:
-            image, mask = random_crop(image, mask, self.crop_size)
+            image, mask = self.random_crop(image, mask)
 
         # apply augmentations
         if self.augmentation:
@@ -98,17 +131,6 @@ class InfiniteDataLoader(DataLoader):
         return batch
 
 
-def load_bands(img, tag='rgbirh'):
-    if tag == 'rgbirh':
-        return img
-    elif tag == 'rgb':
-        return img[:, :, :3]
-    elif tag == 'rgbir':
-        return img[:, :, :4]
-    else:
-        return img
-
-
 def pos_enc(img_name, info_diz):
     key = img_name.split("/")[1] + "-" + img_name.split("/")[2] + "-" + img_name.split("/")[-1].split(".")[0]
 
@@ -127,24 +149,16 @@ def pos_enc(img_name, info_diz):
     return torch.tensor(enc)
 
 
-def crop_or_resize(image, mask, crop_size):
-    n = random.randint(1, 2)
-    if n == 1:
-        choice = random_crop(image, mask, crop_size)
-    if n == 2:
-        choice = im_resize(image, mask, crop_size)
-    return choice
+if __name__ == "__main__":
 
+    root_dir = sys.argv[1]
+    source_images_txt = sys.argv[2]
+    source_masks_txt = sys.argv[3]
 
-def im_resize(image, mask, crop_size):
-    image = cv2.resize(image, (crop_size, crop_size), interpolation=cv2.INTER_NEAREST)
-    mask = cv2.resize(mask, (crop_size, crop_size), interpolation=cv2.INTER_NEAREST)
-    return image, mask
+    dataset = SupDataset(root_dir, source_images_txt, source_masks_txt, bands='rgb', crop_size=256)
 
+    dataloader = DataLoader(dataset, batch_size=4, shuffle=False, num_workers=4)
 
-def random_crop(image, mask, crop_size):
-    h = np.random.randint(0, crop_size)
-    w = np.random.randint(0, crop_size)
-    image = image[h:h + crop_size, w:w + crop_size, :]
-    mask = mask[h:h + crop_size, w:w + crop_size]
-    return image, mask
+    for batch_idx, batch in enumerate(dataloader):
+        names, images, labels = batch
+        print(f"batch - {batch_idx} - ", images.shape, labels.shape)

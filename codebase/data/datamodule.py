@@ -1,7 +1,6 @@
+from flair import SupDataset, InfiniteDataLoader
 from torch.utils.data import DataLoader
 from pytorch_lightning import LightningDataModule
-
-from codebase.datasets.flair import SupDataset, InfiniteDataLoader
 
 
 class DataModule(LightningDataModule):

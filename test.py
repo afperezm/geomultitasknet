@@ -8,7 +8,7 @@ import os
 from argparse import ArgumentParser
 
 from codebase.utils.augmentation import choose_training_augmentations, get_validation_augmentations
-from codebase.datamodule import DataModule
+from codebase.data import DataModule
 from codebase.task_module import SegmentationTask
 from codebase.model import choose_model
 from codebase.utils.optim import set_optimizer, set_scheduler

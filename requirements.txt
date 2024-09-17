@@ -1,5 +1,5 @@
 tqdm==4.66.5
-numpy==2.0.2
+numpy==2.1.1
 torch==2.4.1
 torchvision==0.19.1
 pillow==10.4.0
@@ -14,3 +14,6 @@ online-triplet-loss==0.0.6
 einops==0.8.0
 crfseg==1.0.0
 pytorch-lightning==2.4.0
+PyYAML==6.0.2
+torchmetrics==1.4.2
+prettytable==3.11.0

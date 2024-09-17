@@ -86,7 +86,7 @@ class SegmentationTask(pl.LightningModule):
             outputs["x1"], outputs["x2"], outputs["logits"], outputs["x_coord"] = self.model(input_im)
         return outputs
 
-    def step(self, batch, stage="train"):
+    def shared_step(self, batch, stage="train"):
         if stage == "train":
             idx, images, targets = batch["source"]
             if self.uda:
@@ -177,7 +177,7 @@ class SegmentationTask(pl.LightningModule):
         return loss, preds, targets
 
     def training_step(self, batch, batch_idx):
-        loss, preds, targets = self.step(batch, stage="train")
+        loss, preds, targets = self.shared_step(batch, stage="train")
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def training_step_end(self, step_output):
@@ -206,7 +206,7 @@ class SegmentationTask(pl.LightningModule):
         self.train_metrics.reset()
 
     def validation_step(self, batch, batch_idx):
-        loss, preds, targets = self.step(batch, stage="val")
+        loss, preds, targets = self.shared_step(batch, stage="val")
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def validation_step_end(self, step_output):

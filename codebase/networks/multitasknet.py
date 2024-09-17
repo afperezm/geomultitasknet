@@ -1,9 +1,9 @@
+import torch
+import torch.nn as nn
+
 from codebase.networks.unet import UNet, FDMUNet, ConcatGeoUNet, GeoUNet, EncoderConv
 from codebase.networks.deeplab import DeeplabV3p
 from codebase.networks.resnetunet import UNetResNet
-
-import torch
-import torch.nn as nn
 
 
 class MultiTaskNet(nn.Module):

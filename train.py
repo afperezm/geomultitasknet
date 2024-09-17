@@ -9,8 +9,8 @@ from pathlib import Path
 
 from codebase.utils.augmentation import choose_training_augmentations, get_validation_augmentations
 from codebase.data import DataModule
-from codebase.task_module import SegmentationTask
-from codebase.model import choose_model
+from codebase.models import SegmentationTask
+from codebase.networks.multitasknet import choose_model
 from codebase.utils.optim import set_optimizer, set_scheduler
 from codebase.utils import get_geo_data, choose_loss
 

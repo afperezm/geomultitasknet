@@ -48,7 +48,7 @@ class DataModule(LightningDataModule):
                 self.source_images_txt[0],
                 self.source_masks_txt[0],
                 bands=self.bands[0],
-                cropsize=self.cropsize[0],
+                crop_size=self.cropsize[0],
                 augmentation=self.train_augmentation[0],
             )
 
@@ -57,7 +57,7 @@ class DataModule(LightningDataModule):
                 self.target_images_txt[0],
                 self.target_masks_txt[0],
                 bands=self.bands[0],
-                cropsize=self.cropsize[0],
+                crop_size=self.cropsize[0],
                 augmentation=self.train_augmentation[0],
             )
 
@@ -66,7 +66,7 @@ class DataModule(LightningDataModule):
                 self.target_images_txt[0],
                 self.target_masks_txt[0],
                 bands=self.bands[0],
-                cropsize=self.cropsize[0],
+                crop_size=self.cropsize[0],
                 augmentation=self.valid_augmentation[0],
             )
 
@@ -76,7 +76,7 @@ class DataModule(LightningDataModule):
                 self.target_images_txt[0],
                 self.target_masks_txt[0],
                 bands=self.bands[0],
-                cropsize=self.cropsize[0],
+                crop_size=self.cropsize[0],
                 augmentation=self.valid_augmentation[0],
                 stage="test"
             )
@@ -86,7 +86,7 @@ class DataModule(LightningDataModule):
                 self.target_images_txt[0],
                 self.target_masks_txt[0],
                 bands=self.bands[0],
-                cropsize=self.cropsize[0],
+                crop_size=self.cropsize[0],
                 augmentation=self.valid_augmentation[0],
                 stage="test"
             )

@@ -1,14 +1,14 @@
-from torch.utils.data import Dataset as BaseDataset
-from torch.utils.data import DataLoader
-import torch
-import os
-import tifffile as tiff
-import numpy as np
-import random
 import cv2
+import numpy as np
+import os
+import random
+import tifffile as tiff
+import torch
+
+from torch.utils.data import Dataset, DataLoader
 
 
-class SupDataset(BaseDataset):
+class SupDataset(Dataset):
     """Read images, apply augmentation and preprocessing transformations.
     Args:
         images_dir (str): path to images folder
@@ -23,8 +23,8 @@ class SupDataset(BaseDataset):
             masks_txt,
             bands='rgbirh',
             augmentation=None,
-            cropsize=False,
-            geoinfo=False,
+            crop_size=False,
+            geo_info=False,
             stage="train"
     ):
 
@@ -40,8 +40,8 @@ class SupDataset(BaseDataset):
         self.data_path = path
         self.bands = bands
         self.augmentation = augmentation
-        self.cropsize = cropsize
-        self.geoinfo = geoinfo
+        self.crop_size = crop_size
+        self.geo_info = geo_info
         self.stage = stage
 
     def __getitem__(self, i):
@@ -61,16 +61,16 @@ class SupDataset(BaseDataset):
         mask[mask == 13] = 0
 
         # random crop of the image and the mask
-        if self.cropsize:
-            image, mask = random_crop(image, mask, self.cropsize)
+        if self.crop_size:
+            image, mask = random_crop(image, mask, self.crop_size)
 
         # apply augmentations
         if self.augmentation:
             pair = self.augmentation(image=image, mask=mask)
             image, mask = pair['image'], pair['mask']
 
-        if self.geoinfo:
-            coords = torch.unsqueeze(pos_enc(self.images_fps[i], self.geoinfo), -1)
+        if self.geo_info:
+            coords = torch.unsqueeze(pos_enc(self.images_fps[i], self.geo_info), -1)
             coords = torch.unsqueeze(coords.expand(256, 256), 0).float()
             image = torch.cat((image, coords), dim=0)
 
@@ -128,24 +128,24 @@ def pos_enc(img_name, info_diz):
     return torch.tensor(enc)
 
 
-def crop_or_resize(image, mask, cropsize):
+def crop_or_resize(image, mask, crop_size):
     n = random.randint(1, 2)
     if n == 1:
-        choice = random_crop(image, mask, cropsize)
+        choice = random_crop(image, mask, crop_size)
     if n == 2:
-        choice = im_resize(image, mask, cropsize)
+        choice = im_resize(image, mask, crop_size)
     return choice
 
 
-def im_resize(image, mask, cropsize):
-    image = cv2.resize(image, (cropsize, cropsize), interpolation=cv2.INTER_NEAREST)
-    mask = cv2.resize(mask, (cropsize, cropsize), interpolation=cv2.INTER_NEAREST)
+def im_resize(image, mask, crop_size):
+    image = cv2.resize(image, (crop_size, crop_size), interpolation=cv2.INTER_NEAREST)
+    mask = cv2.resize(mask, (crop_size, crop_size), interpolation=cv2.INTER_NEAREST)
     return image, mask
 
 
-def random_crop(image, mask, cropsize):
-    h = np.random.randint(0, cropsize)
-    w = np.random.randint(0, cropsize)
-    image = image[h:h + cropsize, w:w + cropsize, :]
-    mask = mask[h:h + cropsize, w:w + cropsize]
+def random_crop(image, mask, crop_size):
+    h = np.random.randint(0, crop_size)
+    w = np.random.randint(0, crop_size)
+    image = image[h:h + crop_size, w:w + crop_size, :]
+    mask = mask[h:h + crop_size, w:w + crop_size]
     return image, mask

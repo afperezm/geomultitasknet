@@ -9,13 +9,13 @@ import yaml
 import os
 from argparse import ArgumentParser
 
-from modules.augmentation import choose_training_augmentations, get_validation_augmentations
-from modules.datamodule import DataModule
-from modules.task_module import SegmentationTask
-from modules.model import choose_model
-from modules.optim import set_optimizer, set_scheduler
-from modules.utils import get_geo_data, choose_loss
-from modules.writer import PredictionWriter
+from codebase.augmentation import choose_training_augmentations, get_validation_augmentations
+from codebase.datamodule import DataModule
+from codebase.task_module import SegmentationTask
+from codebase.model import choose_model
+from codebase.optim import set_optimizer, set_scheduler
+from codebase.utils import get_geo_data, choose_loss
+from codebase.writer import PredictionWriter
 
 
 def get_args():

@@ -15,8 +15,8 @@ class DataModule(LightningDataModule):
             bands='rgbirh',
             train_augmentation=None,
             valid_augmentation=None,
-            cropsize=256,
-            geoinfo=False,
+            crop_size=256,
+            geo_info=False,
             batch_size=25,
             num_workers=0,
             drop_last=False,
@@ -31,8 +31,8 @@ class DataModule(LightningDataModule):
         self.bands = bands,
         self.train_augmentation = train_augmentation,
         self.valid_augmentation = valid_augmentation,
-        self.cropsize = cropsize,
-        self.geoinfo = geoinfo,
+        self.crop_size = crop_size,
+        self.geo_info = geo_info,
         self.batch_size = batch_size,
         self.num_workers = num_workers,
         self.drop_last = drop_last,
@@ -48,7 +48,7 @@ class DataModule(LightningDataModule):
                 self.source_images_txt[0],
                 self.source_masks_txt[0],
                 bands=self.bands[0],
-                crop_size=self.cropsize[0],
+                crop_size=self.crop_size[0],
                 augmentation=self.train_augmentation[0],
             )
 
@@ -57,7 +57,7 @@ class DataModule(LightningDataModule):
                 self.target_images_txt[0],
                 self.target_masks_txt[0],
                 bands=self.bands[0],
-                crop_size=self.cropsize[0],
+                crop_size=self.crop_size[0],
                 augmentation=self.train_augmentation[0],
             )
 
@@ -66,7 +66,7 @@ class DataModule(LightningDataModule):
                 self.target_images_txt[0],
                 self.target_masks_txt[0],
                 bands=self.bands[0],
-                crop_size=self.cropsize[0],
+                crop_size=self.crop_size[0],
                 augmentation=self.valid_augmentation[0],
             )
 
@@ -76,7 +76,7 @@ class DataModule(LightningDataModule):
                 self.target_images_txt[0],
                 self.target_masks_txt[0],
                 bands=self.bands[0],
-                crop_size=self.cropsize[0],
+                crop_size=self.crop_size[0],
                 augmentation=self.valid_augmentation[0],
                 stage="test"
             )
@@ -86,7 +86,7 @@ class DataModule(LightningDataModule):
                 self.target_images_txt[0],
                 self.target_masks_txt[0],
                 bands=self.bands[0],
-                crop_size=self.cropsize[0],
+                crop_size=self.crop_size[0],
                 augmentation=self.valid_augmentation[0],
                 stage="test"
             )

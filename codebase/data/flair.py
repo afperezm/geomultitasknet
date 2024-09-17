@@ -18,26 +18,25 @@ class SupDataset(Dataset):
 
     def __init__(
             self,
-            path,
+            data_dir,
             images_txt,
             masks_txt,
             bands='rgbirh',
             augmentation=None,
-            crop_size=False,
-            geo_info=False,
-            stage="train"
+            crop_size=None,
+            geo_info=None,
+            stage='train'
     ):
 
         with open(images_txt) as f:
             lines = f.readlines()
-
         self.images_fps = sorted([line.strip() for line in lines])
 
         with open(masks_txt) as f:
             lines = f.readlines()
         self.masks_fps = sorted([line.strip() for line in lines])
 
-        self.data_path = path
+        self.data_dir = data_dir
         self.bands = bands
         self.augmentation = augmentation
         self.crop_size = crop_size
@@ -47,8 +46,8 @@ class SupDataset(Dataset):
     def __getitem__(self, i):
 
         # read data
-        image = tiff.imread(os.path.join(self.data_path, self.images_fps[i]))
-        mask = tiff.imread(os.path.join(self.data_path, self.masks_fps[i]))
+        image = tiff.imread(os.path.join(self.data_dir, self.images_fps[i]))
+        mask = tiff.imread(os.path.join(self.data_dir, self.masks_fps[i]))
 
         image = load_bands(image, self.bands)  # select only bands of interest
 

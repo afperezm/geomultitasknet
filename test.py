@@ -1,19 +1,17 @@
 import torch
-import torch.nn as nn
 from pytorch_lightning import Trainer
 
 import numpy as np
 import shutil
-from pathlib import Path
 import yaml
 import os
 from argparse import ArgumentParser
 
-from codebase.augmentation import choose_training_augmentations, get_validation_augmentations
+from codebase.utils.augmentation import choose_training_augmentations, get_validation_augmentations
 from codebase.datamodule import DataModule
 from codebase.task_module import SegmentationTask
 from codebase.model import choose_model
-from codebase.optim import set_optimizer, set_scheduler
+from codebase.utils.optim import set_optimizer, set_scheduler
 from codebase.utils import get_geo_data, choose_loss
 from codebase.writer import PredictionWriter
 

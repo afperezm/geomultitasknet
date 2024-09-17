@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from prettytable import PrettyTable
 
-from .utils import spatiotemporal_batches, calc_miou, four_crops
+from codebase.utils import spatiotemporal_batches, calc_miou, four_crops
 
 
 class SegmentationTask(pl.LightningModule):

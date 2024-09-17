@@ -1,4 +1,18 @@
+import argparse
+import numpy as np
+import os
+import shutil
 import torch
+import yaml
+
+from pathlib import Path
+
+from codebase.utils.augmentation import choose_training_augmentations, get_validation_augmentations
+from codebase.data import DataModule
+from codebase.task_module import SegmentationTask
+from codebase.model import choose_model
+from codebase.utils.optim import set_optimizer, set_scheduler
+from codebase.utils import get_geo_data, choose_loss
 
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
@@ -10,23 +24,9 @@ try:
 except ImportError:
     from pytorch_lightning.utilities.rank_zero import rank_zero_only
 
-import numpy as np
-import shutil
-from pathlib import Path
-import yaml
-import os
-from argparse import ArgumentParser
-
-from codebase.utils.augmentation import choose_training_augmentations, get_validation_augmentations
-from codebase.data import DataModule
-from codebase.task_module import SegmentationTask
-from codebase.model import choose_model
-from codebase.utils.optim import set_optimizer, set_scheduler
-from codebase.utils import get_geo_data, choose_loss
-
 
 def get_args():
-    parser = ArgumentParser(description="Hyperparameters", add_help=True)
+    parser = argparse.ArgumentParser(description="Hyperparameters", add_help=True)
     parser.add_argument('-c', '--config-name', type=str, help='YAML Config name', dest='CONFIG', default='baseline')
     parser.add_argument('-nw', '--num-workers', type=int, help='Number of workers', dest='NW', default=12)
     parser.add_argument('-gpu', '--gpus_per_node', type=int, help='Number of GPUs per node', dest='GPUs', default=1)

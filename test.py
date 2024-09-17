@@ -1,11 +1,9 @@
-import torch
-from pytorch_lightning import Trainer
-
+import argparse
 import numpy as np
-import shutil
-import yaml
 import os
-from argparse import ArgumentParser
+import shutil
+import torch
+import yaml
 
 from codebase.utils.augmentation import choose_training_augmentations, get_validation_augmentations
 from codebase.data import DataModule
@@ -15,9 +13,11 @@ from codebase.utils.optim import set_optimizer, set_scheduler
 from codebase.utils import get_geo_data, choose_loss
 from codebase.writer import PredictionWriter
 
+from pytorch_lightning import Trainer
+
 
 def get_args():
-    parser = ArgumentParser(description="Hyperparameters", add_help=True)
+    parser = argparse.ArgumentParser(description="Hyperparameters", add_help=True)
     parser.add_argument('-c', '--config-name', type=str, help='YAML Config name', dest='CONFIG', default='baseline')
     parser.add_argument('-nw', '--num-workers', type=int, help='Number of workers', dest='NW', default=12)
     parser.add_argument('-gpu', '--gpus_per_node', type=int, help='Number of GPUs per node', dest='GPUs', default=1)

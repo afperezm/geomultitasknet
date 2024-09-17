@@ -1,9 +1,8 @@
-import sys
-
 import cv2
 import numpy as np
 import os
 import random
+import sys
 import tifffile as tiff
 import torch
 

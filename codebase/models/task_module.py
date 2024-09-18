@@ -93,6 +93,8 @@ class SegmentationTask(pl.LightningModule):
                 idx_t, im_t, _ = batch["target"]
         elif stage in ("val", "test"):
             idx, images, targets = batch
+        else:
+            raise ValueError("'stage' must one of 'train', 'val' or test'")
 
         outputs = self.forward(images, idx)
 

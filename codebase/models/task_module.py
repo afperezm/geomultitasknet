@@ -26,7 +26,7 @@ class SegmentationTask(pl.LightningModule):
             scheduler=None,
             uda=False,
             geo_data=False,
-            metadata=False,
+            metadata=None,
             config_name=False
     ):
 

@@ -2,9 +2,9 @@ from torch import nn
 from torchvision.models import MobileNetV2
 
 try:
-    from torchvision.models.mobilenetv2 import _make_divisible, ConvBNReLU
+    from torchvision.models.mobilenetv2 import _make_divisible, Conv2dNormActivation
 except ModuleNotFoundError:
-    from torchvision.models.mobilenet import _make_divisible, ConvBNReLU
+    from torchvision.models.mobilenet import _make_divisible, Conv2dNormActivation
 
 
 class MobileNetV2(MobileNetV2):

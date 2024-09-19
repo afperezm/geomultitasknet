@@ -11,7 +11,7 @@ from codebase.models import SegmentationModel
 from codebase.networks.multitasknet import choose_model
 from codebase.utils.optim import set_optimizer, set_scheduler
 from codebase.utils import get_geo_data, choose_loss
-from codebase.writer import PredictionWriter
+from codebase.utils.writer import PredictionWriter
 
 from pytorch_lightning import Trainer
 

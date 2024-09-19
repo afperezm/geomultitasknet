@@ -1,1 +1,1 @@
-from .task_module import SegmentationTask
+from .segmentation import SegmentationModel

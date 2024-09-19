@@ -16,7 +16,7 @@ from prettytable import PrettyTable
 from codebase.utils import spatiotemporal_batches, calc_miou, four_crops
 
 
-class SegmentationTask(pl.LightningModule):
+class SegmentationModel(pl.LightningModule):
     def __init__(
             self,
             model,

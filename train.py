@@ -9,7 +9,7 @@ from pathlib import Path
 
 from codebase.utils.augmentation import choose_training_augmentations, get_validation_augmentations
 from codebase.data import DataModule
-from codebase.models import SegmentationTask
+from codebase.models import SegmentationModel
 from codebase.networks.multitasknet import choose_model
 from codebase.utils.optim import set_optimizer, set_scheduler
 from codebase.utils import get_geo_data, choose_loss
@@ -100,7 +100,7 @@ scheduler = set_scheduler(exp_config['optim'], optimizer)
 print('Scheduler selected: ', exp_config['optim']['lr_schedule_type'])
 
 ###########   SEGMENTATION MODULE    ##########
-seg_module = SegmentationTask(
+seg_module = SegmentationModel(
     model=net,
     num_classes=exp_config['model']['num_classes'],
     criteria=criteria,

@@ -65,7 +65,10 @@ train_trans = choose_training_augmentations(exp_config)
 val_trans = get_validation_augmentations(*exp_config['data']['val']['normalization'])
 
 ###########  GET OTHER DATA ##############
-geo_data = get_geo_data("../data/DATASET_DEF1_METADATA_train.json", "../data/DATASET_DEF1_METADATA_test.json")
+if os.path.exists("../data/DATASET_DEF1_METADATA_train.json") and os.path.exists("../data/DATASET_DEF1_METADATA_test.json"):
+    geo_data = get_geo_data("../data/DATASET_DEF1_METADATA_train.json", "../data/DATASET_DEF1_METADATA_test.json")
+else:
+    geo_data = None
 metadata = exp_config["metadata"]
 
 ###########   DATAMODULE    ##########

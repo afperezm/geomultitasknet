@@ -6,7 +6,8 @@ general:
 # Model parameters.
 model:
   model_name: "unet"
-  constraint_name: "multitask_strategy"
+#  constraint_name: "multitask_strategy"
+  constraint_name:
   mt_time: False
   pooling: False
   after_encoder: True
@@ -21,6 +22,7 @@ model:
   num_channels: 3
   class_ignored: 0
   ckpt_path: False
+  predictor_depth:
 
 # Metadata for spatiotemporal info.
 metadata:

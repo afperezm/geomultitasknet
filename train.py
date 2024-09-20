@@ -26,12 +26,12 @@ except ImportError:
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Hyperparameters", add_help=True)
+    parser = argparse.ArgumentParser(description="Generic trainer for UDA adaptation/segmentation", add_help=True)
     parser.add_argument('-c', '--config-name', type=str, help='YAML Config name', dest='CONFIG', default='baseline')
     parser.add_argument('-nw', '--num-workers', type=int, help='Number of workers', dest='NW', default=12)
     parser.add_argument('-gpu', '--gpus_per_node', type=int, help='Number of GPUs per node', dest='GPUs', default=1)
     parser.add_argument('-n', '--nodes', type=int, help='Number of nodes', dest='Ns', default=1)
-    parser.add_argument('-s', '--strategy', type=str, help='None if only one GPU, else ddp', dest='S', default=None)
+    parser.add_argument('-s', '--strategy', type=str, help='None if only one GPU, else ddp', dest='S', default='auto')
     return parser.parse_args()
 
 

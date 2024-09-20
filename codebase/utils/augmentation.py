@@ -56,8 +56,10 @@ def randaugment(N, M, p, mean, std, mode="all", cut_out=False):
     cut = np.linspace(0, 60, 10)
     # Transformation search space  
     Aug = [  # 0 - geometrical
-        A.ShiftScaleRotate(shift_limit_x=shift_x[M], rotate_limit=0, shift_limit_y=0, shift_limit=shift_x[M], p=p),
-        A.ShiftScaleRotate(shift_limit_y=shift_y[M], rotate_limit=0, shift_limit_x=0, shift_limit=shift_y[M], p=p),
+        A.ShiftScaleRotate(shift_limit_x=shift_x[M] / 256, rotate_limit=0, shift_limit_y=0,
+                           shift_limit=shift_x[M] / 256, p=p),
+        A.ShiftScaleRotate(shift_limit_y=shift_y[M] / 256, rotate_limit=0, shift_limit_x=0,
+                           shift_limit=shift_y[M] / 256, p=p),
         A.Affine(rotate=rot[M], p=p),
         A.Affine(shear=shear[M], p=p),
         A.InvertImg(p=p),
@@ -79,7 +81,8 @@ def randaugment(N, M, p, mean, std, mode="all", cut_out=False):
     ops = list(ops)
 
     if cut_out:
-        ops.append(A.Cutout(num_holes=8, max_h_size=int(cut[M]), max_w_size=int(cut[M]), p=p))
+        ops.append(A.CoarseDropout(num_holes_range=(8, 8), hole_height_range=(int(cut[M]), int(cut[M])),
+                                   hole_width_range=(int(cut[M]), int(cut[M])), p=p))
 
     ops.append(A.Normalize(mean=mean, std=std))
     ops.append(apt.ToTensorV2())

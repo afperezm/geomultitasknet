@@ -192,7 +192,7 @@ class SegmentationModel(pl.LightningModule):
         self.train_metrics(preds=preds, target=targets)
         return loss
 
-    def training_epoch_end(self, outputs):
+    def on_train_epoch_end(self):
         self.train_epoch_loss = self.train_loss.compute()
         self.train_epoch_metrics = self.train_metrics.compute()
         self.log(
@@ -221,7 +221,7 @@ class SegmentationModel(pl.LightningModule):
         self.val_metrics(preds=preds, target=targets)
         return loss
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
         self.val_epoch_loss = self.val_loss.compute()
         self.val_epoch_metrics = self.val_metrics.compute()
         self.log(

@@ -47,10 +47,12 @@ class SegmentationModel(pl.LightningModule):
             self.train_epoch_metrics, self.val_epoch_metrics = None, None
 
             self.train_metrics = JaccardIndex(
+                task="multiclass",
                 num_classes=self.num_classes,
                 absent_score=1.0,
                 reduction='elementwise_mean')
             self.val_metrics = JaccardIndex(
+                task="multiclass",
                 num_classes=self.num_classes,
                 absent_score=1.0,
                 reduction='elementwise_mean')
@@ -60,6 +62,7 @@ class SegmentationModel(pl.LightningModule):
         elif stage == "validate":
             self.val_epoch_loss, self.val_epoch_metrics = None, None
             self.val_metrics = JaccardIndex(
+                task="multiclass",
                 num_classes=self.num_classes,
                 absent_score=1.0,
                 reduction='elementwise_mean')
@@ -69,6 +72,7 @@ class SegmentationModel(pl.LightningModule):
             self.cm_test_metrics = ConfusionMatrix(task="multiclass",
                                                    num_classes=self.num_classes)
             self.test_metrics = JaccardIndex(
+                task="multiclass",
                 num_classes=self.num_classes,
                 reduction="none")
 

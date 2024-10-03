@@ -48,14 +48,10 @@ class SegmentationModel(pl.LightningModule):
 
             self.train_metrics = JaccardIndex(
                 task="multiclass",
-                num_classes=self.num_classes,
-                absent_score=1.0,
-                reduction='elementwise_mean')
+                num_classes=self.num_classes)
             self.val_metrics = JaccardIndex(
                 task="multiclass",
-                num_classes=self.num_classes,
-                absent_score=1.0,
-                reduction='elementwise_mean')
+                num_classes=self.num_classes)
             self.train_loss = MeanMetric()
             self.val_loss = MeanMetric()
 
@@ -63,9 +59,7 @@ class SegmentationModel(pl.LightningModule):
             self.val_epoch_loss, self.val_epoch_metrics = None, None
             self.val_metrics = JaccardIndex(
                 task="multiclass",
-                num_classes=self.num_classes,
-                absent_score=1.0,
-                reduction='elementwise_mean')
+                num_classes=self.num_classes)
             self.val_loss = MeanMetric()
 
         elif stage == "test":
@@ -73,8 +67,7 @@ class SegmentationModel(pl.LightningModule):
                                                    num_classes=self.num_classes)
             self.test_metrics = JaccardIndex(
                 task="multiclass",
-                num_classes=self.num_classes,
-                reduction="none")
+                num_classes=self.num_classes)
 
     def forward(self, input_im, idx):
         outputs = {}

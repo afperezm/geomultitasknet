@@ -179,7 +179,7 @@ class SegmentationModel(pl.LightningModule):
         loss, preds, targets = self.shared_step(batch, stage="train")
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def training_step_end(self, step_output):
+    def on_train_batch_end(self, step_output, batch, batch_idx):
         loss, preds, targets = (
             step_output["loss"].mean(),
             step_output["preds"],
@@ -208,7 +208,7 @@ class SegmentationModel(pl.LightningModule):
         loss, preds, targets = self.shared_step(batch, stage="val")
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    def validation_step_end(self, step_output):
+    def on_validation_batch_end(self, step_output, batch, batch_idx, dataloader_idx=0):
         loss, preds, targets = (
             step_output["loss"].mean(),
             step_output["preds"],
@@ -272,7 +272,7 @@ class SegmentationModel(pl.LightningModule):
             logger=True,
             rank_zero_only=True)
 
-    def test_epoch_end(self, outputs):
+    def on_test_epoch_end(self):
         cm = self.cm_test_metrics.compute().cpu().numpy()
 
         fig, ax = plt.subplots(figsize=(36, 15))

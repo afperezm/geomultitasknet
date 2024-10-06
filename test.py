@@ -22,7 +22,7 @@ def get_args():
     parser.add_argument('-nw', '--num-workers', type=int, help='Number of workers', dest='NW', default=12)
     parser.add_argument('-gpu', '--gpus_per_node', type=int, help='Number of GPUs per node', dest='GPUs', default=1)
     parser.add_argument('-n', '--nodes', type=int, help='Number of nodes', dest='Ns', default=1)
-    parser.add_argument('-s', '--strategy', type=str, help='None if only one GPU, else ddp', dest='S', default=None)
+    parser.add_argument('-s', '--strategy', type=str, help='None if only one GPU, else ddp', dest='S', default='auto')
     parser.add_argument('-p', '--predict', type=str, help='If True, do the predictions', dest='PREDICT', default=None)
     return parser.parse_args()
 

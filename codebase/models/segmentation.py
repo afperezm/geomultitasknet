@@ -43,24 +43,24 @@ class SegmentationModel(pl.LightningModule):
 
     def setup(self, stage=None):
         if stage == "fit":
-            # self.train_epoch_loss, self.val_epoch_loss = None, None
-            # self.train_epoch_metrics, self.val_epoch_metrics = None, None
+            self.train_epoch_loss, self.val_epoch_loss = None, None
+            self.train_epoch_metrics, self.val_epoch_metrics = None, None
 
-            self.train_metrics = JaccardIndex(
-                task="multiclass",
-                num_classes=self.num_classes)
+            # self.train_metrics = JaccardIndex(
+            #     task="multiclass",
+            #     num_classes=self.num_classes)
             self.val_metrics = JaccardIndex(
                 task="multiclass",
                 num_classes=self.num_classes)
             # self.train_loss = MeanMetric()
-            # self.val_loss = MeanMetric()
+            self.val_loss = MeanMetric()
 
         elif stage == "validate":
-            # self.val_epoch_loss, self.val_epoch_metrics = None, None
+            self.val_epoch_loss, self.val_epoch_metrics = None, None
             self.val_metrics = JaccardIndex(
                 task="multiclass",
                 num_classes=self.num_classes)
-            # self.val_loss = MeanMetric()
+            self.val_loss = MeanMetric()
 
         elif stage == "test":
             self.cm_test_metrics = ConfusionMatrix(task="multiclass",
@@ -178,10 +178,7 @@ class SegmentationModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         loss, preds, targets = self.shared_step(batch, stage="train")
 
-        miou = self.train_metrics(preds=preds, target=targets)
-
         self.log("train_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("train_miou", miou, prog_bar=True, on_step=False, on_epoch=True)
 
         return loss
 
@@ -212,45 +209,39 @@ class SegmentationModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         loss, preds, targets = self.shared_step(batch, stage="val")
+        return {"loss": loss, "preds": preds, "targets": targets}
 
-        miou = self.val_metrics(preds=preds, target=targets)
-
-        self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("val_miou", miou, prog_bar=True, on_step=False, on_epoch=True)
-
+    def on_validation_batch_end(self, step_output, batch, batch_idx, dataloader_idx=0):
+        loss, preds, targets = (
+            step_output["loss"].mean(),
+            step_output["preds"],
+            step_output["targets"]
+        )
+        self.val_loss.update(loss)
+        self.val_metrics(preds=preds, target=targets)
         return loss
 
-    # def on_validation_batch_end(self, step_output, batch, batch_idx, dataloader_idx=0):
-    #     loss, preds, targets = (
-    #         step_output["loss"].mean(),
-    #         step_output["preds"],
-    #         step_output["targets"]
-    #     )
-    #     self.val_loss.update(loss)
-    #     self.val_metrics(preds=preds, target=targets)
-    #     return loss
-
-    # def on_validation_epoch_end(self):
-    #     self.val_epoch_loss = self.val_loss.compute()
-    #     self.val_epoch_metrics = self.val_metrics.compute()
-    #     self.log(
-    #         "val_loss",
-    #         self.val_epoch_loss,
-    #         on_step=False,
-    #         on_epoch=True,
-    #         prog_bar=True,
-    #         logger=True,
-    #         rank_zero_only=True)
-    #     self.log(
-    #         "val_miou",
-    #         self.val_epoch_metrics,
-    #         on_step=False,
-    #         on_epoch=True,
-    #         prog_bar=True,
-    #         logger=True,
-    #         rank_zero_only=True)
-    #     self.val_loss.reset()
-    #     self.val_metrics.reset()
+    def on_validation_epoch_end(self):
+        self.val_epoch_loss = self.val_loss.compute()
+        self.val_epoch_metrics = self.val_metrics.compute()
+        self.log(
+            "val_loss",
+            self.val_epoch_loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            rank_zero_only=True)
+        self.log(
+            "val_miou",
+            self.val_epoch_metrics,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            rank_zero_only=True)
+        self.val_loss.reset()
+        self.val_metrics.reset()
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         idx, images, targets = batch

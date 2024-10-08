@@ -10,6 +10,7 @@ import numpy as np
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
+import torch.nn as nn
 
 from prettytable import PrettyTable
 
@@ -41,6 +42,8 @@ class SegmentationModel(pl.LightningModule):
         self.metadata = metadata
         self.config_name = config_name
 
+        self.class_weights = None
+
     def setup(self, stage=None):
         if stage == "fit":
             self.train_epoch_loss, self.val_epoch_loss = None, None
@@ -69,6 +72,39 @@ class SegmentationModel(pl.LightningModule):
                 task="multiclass",
                 num_classes=self.num_classes)
 
+    def get_dynamic_class_weight(self, labels, temperature=0.1, alpha=0.9):
+        """Calculate weight for each class.
+
+        Args:
+        labels: (N, 1, H, W)
+        temperature : Greater one leads to a uniform distribution, smaller than one pays more attention to the rare classes.
+        alpha: Importance of current states.
+
+        Return:
+        weights (Tensor): (N, H, W)
+        """
+        labels = labels.detach()
+        num_images = labels.shape[0]
+
+        if self.class_weights is None:
+            self.class_weights = torch.ones(self.num_classes, 1, device=labels.device)  # (C, 1)
+
+        masks = torch.stack([(labels == c) for c in range(self.num_classes)]).squeeze(2)  # (C, N, H, W)
+        freq = masks.sum(dim=(2, 3)) / masks.sum(dim=(0, 2, 3))  # (C, N)
+        e_1_minus_freq = torch.exp((1 - freq + 1e-6) / temperature)
+        cur_class_weights = e_1_minus_freq / e_1_minus_freq.sum(dim=0) * self.num_classes  # (C, N)
+
+        assert not torch.isnan(cur_class_weights).any(), 'freq : {}\ne_1_minus_freq: {}'.format(freq, e_1_minus_freq)
+
+        cur_class_weights = alpha * self.class_weights + (1 - alpha) * cur_class_weights  # (C, N)
+        weights = (masks * cur_class_weights.view(self.num_classes, num_images, 1, 1)).sum(dim=0)  # (N, H, W)
+
+        self.class_weights = torch.mean(cur_class_weights, dim=1, keepdim=True)  # (C, 1)
+
+        assert self.class_weights.shape == (self.num_classes, 1)
+
+        return weights
+
     def forward(self, input_im, idx):
         outputs = {}
         if self.model.name in ("FDMUNet", "UNet", "ResUNet18", "ResUNet34", "ResUNet50", "ResUNet101", "ResUNet152"):
@@ -96,6 +132,10 @@ class SegmentationModel(pl.LightningModule):
         outputs = self.forward(images, idx)
 
         seg_criterion = self.criteria["segmentation"]
+
+        if isinstance(seg_criterion, nn.CrossEntropyLoss):
+            seg_criterion.weight = self.get_dynamic_class_weight(targets, temperature=0.9, alpha=0.7)
+
         loss = seg_criterion(outputs["logits"], targets.long())
 
         if self.uda and (stage == "train"):

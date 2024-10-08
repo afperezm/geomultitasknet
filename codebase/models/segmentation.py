@@ -97,13 +97,13 @@ class SegmentationModel(pl.LightningModule):
         assert not torch.isnan(cur_class_weights).any(), 'freq : {}\ne_1_minus_freq: {}'.format(freq, e_1_minus_freq)
 
         cur_class_weights = alpha * self.class_weights + (1 - alpha) * cur_class_weights  # (C, N)
-        weights = (masks * cur_class_weights.view(self.num_classes, num_images, 1, 1)).sum(dim=0)  # (N, H, W)
+        # weights = (masks * cur_class_weights.view(self.num_classes, num_images, 1, 1)).sum(dim=0)  # (N, H, W)
 
         self.class_weights = torch.mean(cur_class_weights, dim=1, keepdim=True)  # (C, 1)
 
         assert self.class_weights.shape == (self.num_classes, 1)
 
-        return weights
+        return self.class_weights
 
     def forward(self, input_im, idx):
         outputs = {}

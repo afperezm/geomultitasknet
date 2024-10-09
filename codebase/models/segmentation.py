@@ -131,10 +131,10 @@ class SegmentationModel(pl.LightningModule):
 
         outputs = self.forward(images, idx)
 
-        seg_criterion = self.criteria["segmentation"]
+        # seg_criterion = self.criteria["segmentation"]
 
-        if isinstance(seg_criterion, nn.CrossEntropyLoss):
-            seg_criterion.weight = self.get_dynamic_class_weight(targets, temperature=0.9, alpha=0.7)
+        weight = self.get_dynamic_class_weight(targets, temperature=0.9, alpha=0.7)
+        seg_criterion = nn.CrossEntropyLoss(weight=weight, ignore_index=0)
 
         loss = seg_criterion(outputs["logits"], targets.long())
 

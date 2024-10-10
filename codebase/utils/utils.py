@@ -478,7 +478,7 @@ def get_geo_data(path_train, path_test):
     train_data = json.load(f1)
     f2 = open(path_test)
     test_data = json.load(f2)
-    geo_data = train_data | test_data
+    geo_data = {**train_data, **test_data}
     return geo_data
 
 

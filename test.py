@@ -57,7 +57,7 @@ train_trans = choose_training_augmentations(exp_config)
 val_trans = get_validation_augmentations(*exp_config['data']['val']['normalization'])
 
 ###########  GET OTHER DATA ##############
-geo_data = get_geo_data(exp_config['data']['path'], 'flair-1_metadata_aerial.json')
+geo_data = get_geo_data("../data/DATASET_DEF1_METADATA_train.json", "../data//DATASET_DEF1_METADATA_test.json")
 metadata = exp_config["metadata"]
 
 ###########   DATAMODULE    ##########

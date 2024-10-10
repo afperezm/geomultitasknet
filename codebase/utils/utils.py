@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from PIL import ImageFilter
 import numpy as np
-import os
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
@@ -475,12 +474,13 @@ def spatiotemporal_batches(img_names,
 
 
 def get_geo_data(path_train, path_test):
-    train_data = json.load(open(path_train)) if os.path.exists(path_train) else None
-    test_data = json.load(open(path_test)) if os.path.exists(path_test) else None
+    f1 = open(path_train)
+    train_data = json.load(f1)
+    f2 = open(path_test)
+    test_data = json.load(f2)
+    geo_data = train_data | test_data
+    return geo_data
 
-    if train_data and test_data:
-        return train_data | test_data  # Merge if both exist
-    return train_data or test_data  # Return the one that exists, or None if neither
 
 def choose_loss(params):
     criteria = {}

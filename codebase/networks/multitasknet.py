@@ -92,7 +92,10 @@ class MultiTaskNet(nn.Module):
                 self.coords_predictor,
                 nn.BatchNorm1d(depth[2]),
                 nn.ReLU(inplace=True),
-                nn.Linear(in_features=depth[2], out_features=256)
+                nn.Linear(in_features=depth[2], out_features=512),
+                nn.BatchNorm1d(512),
+                nn.ReLU(inplace=True),
+                nn.Linear(in_features=512, out_features=256)
             )
 
     def forward(self, x):
